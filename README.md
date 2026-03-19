@@ -47,26 +47,24 @@ File name: /etc/caddy/Caddyfile
 
 File content: (请复制以下代码，并替换其中的 你的域名 和 你的NextDNS_ID)
 
-code
-Caddy
-download
-content_copy
-expand_less
-{
+`{
+    # 彻底禁用 Caddy 自动尝试 HTTP 到 HTTPS 的重定向，交给云平台处理
     auto_https disable_redirects
 }
 
-你的域名.clawcloudrun.com {
+:80 {
+    # 无论用户访问什么路径，都确保转发给 NextDNS 的时候包含了 ID
+    # 这样你访问 domain.com/ 也能解析，访问 domain.com/dns-query 也能解析
     reverse_proxy https://dns.nextdns.io {
         header_up Host dns.nextdns.io
-        # ⚠️ 请将下面这行的 ID 替换为你从 NextDNS 后台获取的真实 ID
-        header_up X-NextDNS-ID 你的NextDNS_ID
+        header_up X-NextDNS-ID e14735
         
+        # 强制指定后端 SNI，这是连接 HTTPS 后端必须的
         transport http {
             tls_server_name dns.nextdns.io
         }
     }
-}
+}`
 
 注意：如果不使用 NextDNS，也可以删除 header_up X-NextDNS-ID 这一行，并直接将 dns.nextdns.io 替换为 cloudflare-dns.com 即可使用 Cloudflare 公共 DNS。
 
